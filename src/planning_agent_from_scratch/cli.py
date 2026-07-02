@@ -59,7 +59,7 @@ def _print_plan(steps: list[str]) -> None:
 
 
 def _print_step_start(step: str) -> None:
-    console.print(f"\n  [dim]→ executing:[/dim] [bold cyan]{step}[/bold cyan]")
+    console.print(f"\n  [dim]⟳ executing:[/dim] [bold cyan]{step}[/bold cyan]")
 
 
 def _print_step_done(step: str, observation: str) -> None:
@@ -130,13 +130,14 @@ def main() -> None:
         plan_ref: list[list[str]] = [[]]
 
         try:
-            state = run_plan(
-                objective=user_input,
-                on_plan_created=lambda steps: (_print_plan(steps), plan_ref[0].__iadd__(steps)),
-                on_step_start=_print_step_start,
-                on_step_done=_print_step_done,
-                on_after_model=_on_after_model if args.thinking else None,
-            )
+            with console.status("[dim]Planning...[/dim]", spinner="dots"):
+                state = run_plan(
+                    objective=user_input,
+                    on_plan_created=lambda steps: (_print_plan(steps), plan_ref[0].__iadd__(steps)),
+                    on_step_start=_print_step_start,
+                    on_step_done=_print_step_done,
+                    on_after_model=_on_after_model if args.thinking else None,
+                )
 
             console.print()
             _print_response(state.response or "", len(state.past_steps))
