@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import sys
+import argparse
 from pathlib import Path
 
 from prompt_toolkit import PromptSession
@@ -21,11 +21,12 @@ _PROMPT_STYLE = Style.from_dict({"prompt": "bold #5f87ff"})
 _HISTORY_FILE = Path.home() / ".planning_agent_history"
 
 
-def _print_header() -> None:
+def _print_header(thinking: bool) -> None:
+    suffix = "  [dim cyan]--thinking[/dim cyan]" if thinking else ""
     console.print()
     console.print(
         Panel.fit(
-            "[bold white]Planning Agent[/bold white]  [dim]deepseek-reasoner[/dim]\n"
+            f"[bold white]Planning Agent[/bold white]  [dim]deepseek-reasoner[/dim]{suffix}\n"
             "[dim]Type your goal and press Enter. [bold]exit[/bold] or Ctrl+C to quit.[/dim]",
             border_style="bright_black",
             padding=(0, 2),
@@ -65,7 +66,7 @@ def _print_step_done(step: str, observation: str) -> None:
     console.print(
         Panel(
             observation,
-            title=f"[bold yellow]Observation[/bold yellow]",
+            title="[bold yellow]Observation[/bold yellow]",
             border_style="#facc15",
             padding=(0, 1),
         )
@@ -96,7 +97,11 @@ def _on_after_model(event: AfterModelCall) -> None:
 
 
 def main() -> None:
-    _print_header()
+    parser = argparse.ArgumentParser(prog="planning-chat", description="Planning agent CLI")
+    parser.add_argument("--thinking", action="store_true", help="Show model reasoning")
+    args = parser.parse_args()
+
+    _print_header(args.thinking)
 
     session: PromptSession = PromptSession(
         history=FileHistory(str(_HISTORY_FILE)),
@@ -130,7 +135,7 @@ def main() -> None:
                 on_plan_created=lambda steps: (_print_plan(steps), plan_ref[0].__iadd__(steps)),
                 on_step_start=_print_step_start,
                 on_step_done=_print_step_done,
-                on_after_model=_on_after_model,
+                on_after_model=_on_after_model if args.thinking else None,
             )
 
             console.print()
