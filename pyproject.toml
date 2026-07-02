@@ -1,0 +1,36 @@
+[project]
+name = "planning-agent-from-scratch"
+version = "0.1.0"
+description = "A plan-and-execute agent built on top of Sophons"
+readme = "README.md"
+authors = [
+    { name = "luchetu", email = "humluchetu@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=2.38.0",
+    "prompt-toolkit>=3.0.52",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "rich>=15.0.0",
+    "sophons",
+    "tavily-python>=0.7.25",
+]
+
+[project.scripts]
+planning-chat = "planning_agent_from_scratch.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.10.8,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.uv.sources]
+sophons = { path = "../sophons", editable = true }
