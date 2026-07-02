@@ -11,7 +11,7 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.text import Text
 
-from sophons.agents.hooks import AfterModelCall, HookRegistry
+from sophons.agents.hooks import AfterModelCall
 
 from .main import run_plan
 
@@ -84,21 +84,15 @@ def _print_response(text: str, steps_taken: int) -> None:
     )
 
 
-def _thinking_hook() -> HookRegistry:
-    registry = HookRegistry()
-
-    def on_after_model(event: AfterModelCall) -> None:
-        reasoning = event.message.metadata.get("reasoning")
-        if reasoning:
-            console.print(Panel(
-                reasoning,
-                title="[bold magenta]Thinking[/bold magenta]",
-                border_style="magenta",
-                padding=(0, 1),
-            ))
-
-    registry.add(on_after_model)
-    return registry
+def _on_after_model(event: AfterModelCall) -> None:
+    reasoning = event.message.metadata.get("reasoning")
+    if reasoning:
+        console.print(Panel(
+            reasoning,
+            title="[bold magenta]Thinking[/bold magenta]",
+            border_style="magenta",
+            padding=(0, 1),
+        ))
 
 
 def main() -> None:
@@ -133,10 +127,10 @@ def main() -> None:
         try:
             state = run_plan(
                 objective=user_input,
-                hooks=_thinking_hook(),
                 on_plan_created=lambda steps: (_print_plan(steps), plan_ref[0].__iadd__(steps)),
                 on_step_start=_print_step_start,
                 on_step_done=_print_step_done,
+                on_after_model=_on_after_model,
             )
 
             console.print()

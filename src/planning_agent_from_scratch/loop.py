@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from sophons.agents.hooks import HookRegistry
+from sophons.agents import Agent
 from sophons.integrations.models import DeepSeekModel
 from sophons.models.messages import Message
-from sophons.tools.base import Tool
 
 from .executor import execute_step
 from .planner import create_plan
@@ -42,9 +41,7 @@ def _update(state: PlanState, model: DeepSeekModel) -> PlanState:
 def run(
     objective: str,
     planner_model: DeepSeekModel,
-    executor_model: DeepSeekModel,
-    tools: list[Tool],
-    hooks: HookRegistry | None = None,
+    executor_agent: Agent,
     on_plan_created: object = None,
     on_step_start: object = None,
     on_step_done: object = None,
@@ -63,7 +60,7 @@ def run(
         if callable(on_step_start):
             on_step_start(step)
 
-        observation = execute_step(state, executor_model, tools, hooks=hooks)
+        observation = execute_step(state, executor_agent)
         state.past_steps.append((step, observation))
         state.plan.pop(0)
         steps_taken += 1
