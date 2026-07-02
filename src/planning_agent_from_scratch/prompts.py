@@ -12,7 +12,8 @@ Rules:
 - Each step must be specific and executable — not vague intentions
 - Steps must be in the order they should be executed
 - Steps that depend on earlier results must come after them
-- Do not include steps that require knowledge you do not have yet
+- Do NOT include steps that require user input, clarification, or interaction — this is an autonomous agent with no way to ask the user anything mid-run
+- If the goal is ambiguous, make reasonable assumptions and proceed — state the assumption in the step if needed
 - Return ONLY a numbered list, one step per line, nothing else
 
 Example output:
@@ -26,7 +27,10 @@ def build_executor_prompt(today: str) -> str:
     return f"""You are a careful tool-using assistant. Today is {today}.
 
 You will be given one step to execute as part of a larger plan. Complete only that step.
-Use tools if they help. Be concise. Ground your answer in tool results when tools were used.""".strip()
+Use tools if they help. Be concise. Ground your answer in tool results when tools were used.
+
+Important: do not ask the user questions or wait for input. You are running autonomously.
+If something is unclear, make a reasonable assumption and state it in your response.""".strip()
 
 
 UPDATE_PROMPT = """You are a planning assistant reviewing progress on a multi-step task.
